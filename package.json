@@ -1,0 +1,1 @@
+{"description":"Free AI model aggregator — one OpenAI/Anthropic-compatible endpoint routing chat requests across free models (Gemini + Pollinations), with failover.","engines":{"node":">=22.6"},"license":"MIT","name":"agentgames-wildcard-aggregator","scripts":{"start":"node --experimental-strip-types main.ts"},"type":"module","version":"1.0.0"}
