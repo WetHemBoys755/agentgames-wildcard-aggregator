@@ -23,7 +23,6 @@
 // (Node >= 22.6; Node 24 runs .ts natively.)
 
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
-import { pathToFileURL } from 'node:url';
 import {
   authHeaders, capabilitiesOf, isRecord, keyOf, meetsRequirements,
   providerStatuses, type Json, type RealModel, type RealProvider, type Requirement,
@@ -393,13 +392,17 @@ async function start(): Promise<void> {
   process.on('SIGINT', () => process.exit(0));
 }
 
+// Start the standalone server only when this file is run directly
+// (node --experimental-strip-types main.ts). In a serverless bundle
+// (e.g. Vercel) argv[1] is the launcher, so the server never starts there.
+// Note: no top-level await and no import.meta here — Vercel compiles
+// functions to CommonJS, where both are unavailable (top-level await
+// fails the build and import.meta breaks at runtime).
 const isMain = process.argv[1] !== undefined &&
-  import.meta.url === pathToFileURL(process.argv[1]).href;
+  (process.argv[1].endsWith('/main.ts') || process.argv[1].endsWith('/main.js'));
 if (isMain) {
-  try {
-    await start();
-  } catch (err) {
+  start().catch((err: unknown) => {
     log((err as Error).stack ?? String(err));
     process.exit(1);
-  }
+  });
 }
